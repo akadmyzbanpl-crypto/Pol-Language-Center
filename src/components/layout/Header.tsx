@@ -36,7 +36,7 @@ export const Header: React.FC = () => {
     { label: 'دوره‌ها', href: '/courses' },
     { label: 'کلاس‌ها', href: '/classes' },
     { label: 'کلاس زنده', href: '/live/class_1', badge: 'Live' },
-    { label: 'گوگل ورک‌اسپیس', href: '/workspace', badge: 'Drive/Docs/Sheets' },
+    { label: 'گوگل ورک‌اسپیس', href: '/workspace', badge: 'Drive/Sheets/Docs/Slides' },
     { label: 'ویدئوها', href: '/videos' },
     { label: 'فروشگاه کتاب', href: '/books' },
     { label: 'اساتید', href: '/teachers' },

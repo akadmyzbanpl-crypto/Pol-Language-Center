@@ -1,6 +1,6 @@
 {
   "name": "Pol Language Center",
-  "description": "آموزشگاه زبان پل - سامانه جامع آموزش زبان با کلاس‌های آنلاین، فروشگاه کتاب، پایگاه‌داده ابری Firestore و یکپارچه‌سازی Google Drive، Google Sheets و Google Docs",
+  "description": "آموزشگاه زبان پل - سامانه جامع آموزش زبان با کلاس‌های آنلاین، فروشگاه کتاب، پایگاه‌داده ابری Firestore و یکپارچه‌سازی Google Drive، Google Sheets، Google Docs و Google Slides",
   "requestFramePermissions": [
     "camera",
     "microphone"

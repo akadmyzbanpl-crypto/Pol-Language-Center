@@ -4,6 +4,7 @@ import {
   DriveFileItem,
   SpreadsheetInfo,
   DocInfo,
+  PresentationInfo,
 } from '../../services/googleWorkspaceService';
 import { db, isFirebaseConfigured } from '../../services/firebase';
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
@@ -11,6 +12,7 @@ import {
   FileSpreadsheet,
   FileText,
   HardDrive,
+  Presentation,
   Plus,
   Trash2,
   ExternalLink,
@@ -25,9 +27,12 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { GoogleSlidesTab } from './GoogleSlidesTab';
+import { AcademyUserGuide } from './AcademyUserGuide';
 
 export const GoogleWorkspaceHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'sheets' | 'drive' | 'docs'>('sheets');
+  const [activeTab, setActiveTab] = useState<'sheets' | 'drive' | 'docs' | 'slides'>('sheets');
+  const [selectedPresentationId, setSelectedPresentationId] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -413,10 +418,10 @@ export const GoogleWorkspaceHub: React.FC = () => {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              مدیریت اسناد ابری گوگل (Google Sheets, Drive, Docs)
+              مدیریت ابزارهای ابری گوگل (Sheets, Drive, Docs, Slides)
             </h1>
             <p className="text-blue-100/90 text-sm sm:text-base max-w-2xl leading-relaxed">
-              اتصال مستقیم آموزشگاه زبان پل به ابزارهای گوگل برای مدیریت یکپارچه کارنامه‌ها، فایل‌های کلاسی و فیدبک‌های تحلیلی رایتینگ.
+              اتصال مستقیم آموزشگاه زبان پل به ابزارهای گوگل برای مدیریت یکپارچه کارنامه‌ها، فایل‌های کلاسی، فیدبک‌های تحلیلی رایتینگ و اسلایدهای تدریس.
             </p>
           </div>
 
@@ -480,14 +485,17 @@ export const GoogleWorkspaceHub: React.FC = () => {
         <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-5 mb-8 flex items-start gap-4">
           <AlertCircle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="font-bold text-base">دسترسی به فایل‌های ابری گوگل با تأیید شما</h3>
+            <h3 className="font-bold text-base">دسترسی به ابزارهای ابری گوگل با تأیید شما</h3>
             <p className="text-sm text-amber-800 leading-relaxed">
-              برای ایجاد و ویرایش برگه‌های حضور و غیاب (Google Sheets)، آپلود منابع کلاسی در Google Drive و ایجاد اسناد طرح درس و تصحیح رایتینگ در Google Docs با اجازه شما از حساب Google استفاده می‌شود.
+              برای ایجاد و ویرایش برگه‌های حضور و غیاب (Google Sheets)، آپلود منابع کلاسی در Google Drive، اسناد طرح درس و تصحیح رایتینگ در Google Docs و اسلایدهای تدریس در Google Slides با اجازه شما از حساب Google استفاده می‌شود.
               کافیست دکمه <strong>«ورود با حساب گوگل»</strong> را فشرده و دسترسی لازم را تأیید فرمایید.
             </p>
           </div>
         </div>
       )}
+
+      {/* Interactive Academy & Site Guide */}
+      <AcademyUserGuide />
 
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-200 mb-8 overflow-x-auto">
@@ -528,6 +536,19 @@ export const GoogleWorkspaceHub: React.FC = () => {
           <FileText className="w-5 h-5 text-indigo-600" />
           <span>گوگل داکس (Google Docs)</span>
           <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-medium">طرح درس و رایتینگ</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('slides')}
+          className={`flex items-center gap-2 px-6 py-3.5 font-bold text-sm border-b-2 transition whitespace-nowrap ${
+            activeTab === 'slides'
+              ? 'border-amber-500 text-amber-600 bg-amber-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Presentation className="w-5 h-5 text-amber-500" />
+          <span>گوگل اسلایدز (Google Slides)</span>
+          <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">اسلایدهای تدریس و ارائه</span>
         </button>
       </div>
 
@@ -783,6 +804,7 @@ export const GoogleWorkspaceHub: React.FC = () => {
                 {driveFiles.map((file) => {
                   const isSheet = file.mimeType.includes('spreadsheet');
                   const isDoc = file.mimeType.includes('document');
+                  const isSlide = file.mimeType.includes('presentation');
                   const isFolder = file.mimeType.includes('folder');
 
                   return (
@@ -794,6 +816,8 @@ export const GoogleWorkspaceHub: React.FC = () => {
                               ? 'bg-emerald-100 text-emerald-600'
                               : isDoc
                               ? 'bg-indigo-100 text-indigo-600'
+                              : isSlide
+                              ? 'bg-amber-100 text-amber-600'
                               : isFolder
                               ? 'bg-amber-100 text-amber-600'
                               : 'bg-blue-100 text-blue-600'
@@ -803,6 +827,8 @@ export const GoogleWorkspaceHub: React.FC = () => {
                             <FileSpreadsheet className="w-5 h-5" />
                           ) : isDoc ? (
                             <FileText className="w-5 h-5" />
+                          ) : isSlide ? (
+                            <Presentation className="w-5 h-5" />
                           ) : isFolder ? (
                             <FolderPlus className="w-5 h-5" />
                           ) : (
@@ -812,7 +838,7 @@ export const GoogleWorkspaceHub: React.FC = () => {
                         <div className="min-w-0">
                           <h4 className="text-sm font-bold text-slate-800 truncate">{file.name}</h4>
                           <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                            <span>{isSheet ? 'Google Sheets' : isDoc ? 'Google Docs' : isFolder ? 'پوشه' : 'فایل'}</span>
+                            <span>{isSheet ? 'Google Sheets' : isDoc ? 'Google Docs' : isSlide ? 'Google Slides' : isFolder ? 'پوشه' : 'فایل'}</span>
                             {file.modifiedTime && (
                               <span>• {new Date(file.modifiedTime).toLocaleDateString('fa-IR')}</span>
                             )}
@@ -841,6 +867,17 @@ export const GoogleWorkspaceHub: React.FC = () => {
                               fetchDocData(file.id);
                             }}
                             className="px-2.5 py-1 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium"
+                          >
+                            نمایش در اپ
+                          </button>
+                        )}
+                        {isSlide && (
+                          <button
+                            onClick={() => {
+                              setSelectedPresentationId(file.id);
+                              setActiveTab('slides');
+                            }}
+                            className="px-2.5 py-1 text-xs bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg font-medium"
                           >
                             نمایش در اپ
                           </button>
@@ -1003,6 +1040,18 @@ export const GoogleWorkspaceHub: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* ----------------- TAB: GOOGLE SLIDES ----------------- */}
+      {activeTab === 'slides' && (
+        <GoogleSlidesTab
+          isAuthenticated={isAuthenticated}
+          loading={loading}
+          onSaveFile={saveFileToFirestore}
+          onRefreshDrive={loadInitialData}
+          selectedPresentationId={selectedPresentationId}
+          onSelectPresentationId={setSelectedPresentationId}
+        />
       )}
 
       {/* Explicit User Confirmation Modal for Destructive Operations */}

@@ -14,6 +14,8 @@ export const SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets.readonly',
   'https://www.googleapis.com/auth/documents',
   'https://www.googleapis.com/auth/documents.readonly',
+  'https://www.googleapis.com/auth/presentations',
+  'https://www.googleapis.com/auth/presentations.readonly',
 ];
 
 export interface DriveFileItem {
@@ -37,6 +39,15 @@ export interface DocInfo {
   documentId: string;
   title: string;
   body?: any;
+}
+
+export interface PresentationInfo {
+  presentationId: string;
+  title: string;
+  slides?: Array<{
+    objectId: string;
+    pageElements?: any[];
+  }>;
 }
 
 let cachedAccessToken: string | null = null;
@@ -438,5 +449,131 @@ export const googleWorkspaceService = {
 -----------------------------------------------------`;
 
     return await this.createDocument(title, template);
+  },
+
+  // ----------------------------------------------------
+  // GOOGLE SLIDES API
+  // ----------------------------------------------------
+  async createPresentation(title: string): Promise<PresentationInfo> {
+    const token = this.getAccessToken();
+    if (!token) throw new Error('لطفاً ابتدا با حساب Google وارد شوید');
+
+    const res = await fetch('https://slides.googleapis.com/v1/presentations', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'خطا در ایجاد ارائه گوگل اسلایدز');
+    }
+
+    return await res.json();
+  },
+
+  async getPresentation(presentationId: string): Promise<PresentationInfo> {
+    const token = this.getAccessToken();
+    if (!token) throw new Error('لطفاً ابتدا با حساب Google وارد شوید');
+
+    const res = await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'خطا در دریافت اسلایدهای ارائه');
+    }
+
+    return await res.json();
+  },
+
+  async addSlideWithText(presentationId: string, titleText: string, bodyText: string): Promise<void> {
+    const token = this.getAccessToken();
+    if (!token) throw new Error('لطفاً ابتدا با حساب Google وارد شوید');
+
+    const slideId = 'slide_' + Math.random().toString(36).substring(2, 9);
+    const titleBoxId = 'title_' + Math.random().toString(36).substring(2, 9);
+    const bodyBoxId = 'body_' + Math.random().toString(36).substring(2, 9);
+
+    const requests = [
+      {
+        createSlide: {
+          objectId: slideId,
+          insertionIndex: 1,
+          slideLayoutReference: { predefinedLayout: 'BLANK' },
+        },
+      },
+      {
+        createShape: {
+          objectId: titleBoxId,
+          shapeType: 'TEXT_BOX',
+          elementProperties: {
+            pageObjectId: slideId,
+            size: { height: { magnitude: 50, unit: 'PT' }, width: { magnitude: 600, unit: 'PT' } },
+            transform: { scaleX: 1, scaleY: 1, translateX: 50, translateY: 40, unit: 'PT' },
+          },
+        },
+      },
+      {
+        insertText: {
+          objectId: titleBoxId,
+          text: titleText,
+        },
+      },
+      {
+        createShape: {
+          objectId: bodyBoxId,
+          shapeType: 'TEXT_BOX',
+          elementProperties: {
+            pageObjectId: slideId,
+            size: { height: { magnitude: 250, unit: 'PT' }, width: { magnitude: 600, unit: 'PT' } },
+            transform: { scaleX: 1, scaleY: 1, translateX: 50, translateY: 110, unit: 'PT' },
+          },
+        },
+      },
+      {
+        insertText: {
+          objectId: bodyBoxId,
+          text: bodyText,
+        },
+      },
+    ];
+
+    const res = await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ requests }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'خطا در افزودن اسلاید جدید');
+    }
+  },
+
+  async createTeachingSlides(topic: string, teacherName: string): Promise<PresentationInfo> {
+    const title = `اسلایدهای تدریس: ${topic} - ${teacherName}`;
+    const presentation = await this.createPresentation(title);
+    try {
+      await this.addSlideWithText(
+        presentation.presentationId,
+        `آموزشگاه زبان پل - ${topic}`,
+        `مدرس: ${teacherName}\nتاریخ: ${new Date().toLocaleDateString('fa-IR')}\n\nسرفصل‌های آموزشی این جلسه:\n۱. نکات کلیدی گرامر و کاربرد در مکالمه\n۲. لغات پرکاربرد و اصطلاحات روزمره\n۳. تمرین و فعالیت کلاسی دو نفره (Pair Work)\n۴. تکالیف جلسه آینده`
+      );
+    } catch (e) {
+      console.warn('Default slide addition skipped, presentation created:', e);
+    }
+    return presentation;
   },
 };
