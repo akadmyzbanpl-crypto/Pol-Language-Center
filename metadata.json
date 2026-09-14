@@ -1,0 +1,11 @@
+{
+  "name": "Pol Language Center",
+  "description": "آموزشگاه زبان پل - سامانه جامع آموزش زبان انگلیسی با کلاس‌های آنلاین، دوره‌ها، فروشگاه کتاب، پنل دانش‌آموز، استاد و مدیریت",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
