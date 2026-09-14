@@ -26,6 +26,7 @@ import { Register } from './pages/public/Register';
 import { ForgotPassword } from './pages/public/ForgotPassword';
 import { Forbidden } from './pages/public/Forbidden';
 import { NotFound } from './pages/public/NotFound';
+import { GoogleWorkspaceHub } from './pages/workspace/GoogleWorkspaceHub';
 
 // Public Classes & Live Classes
 import { Classes } from './pages/public/Classes';
@@ -97,6 +98,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="/workspace" element={<GoogleWorkspaceHub />} />
           <Route path="/dev/seed" element={<DevSeed />} />
         </Route>
 

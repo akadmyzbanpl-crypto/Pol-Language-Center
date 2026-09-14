@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing role and personal details",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "teacher", "admin"] },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role", "firstName", "lastName"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Educational course offered by the academy",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "price": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "teacherName", "price"]
+    },
+    "Class": {
+      "title": "Class",
+      "description": "Interactive live or offline class session",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "type": { "type": "string", "enum": ["online", "in_person"] },
+        "capacity": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["title", "teacherName", "type"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "Book or textbook sold in the academy bookstore",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" }
+      },
+      "required": ["title", "author", "price"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Purchase order for books or courses",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "total", "status"]
+    },
+    "WorkspaceFile": {
+      "title": "WorkspaceFile",
+      "description": "Linked Google Drive, Sheet or Doc resource for coursework",
+      "type": "object",
+      "properties": {
+        "fileId": { "type": "string" },
+        "name": { "type": "string" },
+        "mimeType": { "type": "string" },
+        "type": { "type": "string", "enum": ["doc", "sheet", "drive_file"] },
+        "userId": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["fileId", "name", "type", "userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Collection of user profile documents"
+    },
+    "/courses/{courseId}": {
+      "schema": { "$ref": "#/entities/Course" },
+      "description": "Collection of academy courses"
+    },
+    "/classes/{classId}": {
+      "schema": { "$ref": "#/entities/Class" },
+      "description": "Collection of academy class schedules"
+    },
+    "/books/{bookId}": {
+      "schema": { "$ref": "#/entities/Book" },
+      "description": "Collection of books and educational materials"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Collection of user orders"
+    },
+    "/workspaceFiles/{fileId}": {
+      "schema": { "$ref": "#/entities/WorkspaceFile" },
+      "description": "Collection of linked Google Docs, Sheets, and Drive files"
+    }
+  }
+}
